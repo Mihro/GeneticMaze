@@ -2,33 +2,33 @@
 #include <iostream>
 #include <vector>
 
-std::vector<std::vector<int>> readMazeFromFile(const char* _path);
+std::vector<std::vector<int>> readTerrainFromFile(const char* _path);
 
 int main()
 {
-	std::vector<std::vector<int>> mazeMap = readMazeFromFile("../src/Labs15and16TerrainFile1.txt");
+	std::vector<std::vector<int>> terrain = readTerrainFromFile("../src/Labs15and16TerrainFile1.txt");
 
 	system("pause");
 	return 0;
 }
 
-std::vector<std::vector<int>> readMazeFromFile(const char* _path)
+std::vector<std::vector<int>> readTerrainFromFile(const char* _path)
 {
 	std::ifstream inFile(_path);
 
 	// Extract maze dimensions
-	int width = 0, height = 0;
-	inFile >> width >> height;
-	std::cout << width << " " << height << std::endl; // Debug output
+	int sizeX = 0, sizeY = 0;
+	inFile >> sizeX >> sizeY;
+	std::cout << sizeX << " " << sizeY << std::endl; // Debug output
 
 	// Create & resize 2D maze vector
 	std::vector<std::vector<int>> data;
-	data.resize(height, std::vector<int>(width));
+	data.resize(sizeY, std::vector<int>(sizeX));
 
 	// Populate 2D maze
-	for (int h = 0; h < height; h++)
+	for (int h = 0; h < sizeY; h++)
 	{
-		for (int w = 0; w < width; w++)
+		for (int w = 0; w < sizeX; w++)
 		{
 			inFile >> data[h][w];
 			std::cout << data[h][w] << " "; // Debug output
