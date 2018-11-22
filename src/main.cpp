@@ -6,7 +6,7 @@ std::vector<std::vector<int>> readTerrainFromFile(const char* _path);
 
 int main()
 {
-	std::vector<std::vector<int>> terrain = readTerrainFromFile("../src/Labs15and16TerrainFile1.txt");
+	std::vector<std::vector<int>> terrain = readTerrainFromFile("../src/Maze1.txt");
 
 	system("pause");
 	return 0;
