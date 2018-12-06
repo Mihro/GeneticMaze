@@ -39,7 +39,7 @@ std::uniform_real_distribution<double> uniformDistribution(0.0, 1.0);
 
 int main()
 {
-	Maze maze = readTerrainFromFile("../src/Maze1.txt");
+	Maze maze = readTerrainFromFile("../src/Labs15and16TerrainFile1.txt");
 	std::vector<Chromosome> population = generatePopulation(10, 16);
 	populationFitness(population, maze);
 
@@ -57,9 +57,8 @@ Maze readTerrainFromFile(const char* _path)
 	inFile >> maze.width >> maze.height;
 	std::cout << maze.width << " " << maze.height << std::endl; // Debug output
 
-	// Create & resize 2D maze vector
-	std::vector<std::vector<int>> data;
-	data.resize(maze.height, std::vector<int>(maze.width));
+	// Resize 2D maze terrain
+	maze.terrain.resize(maze.height, std::vector<int>(maze.width));
 
 	// Populate 2D maze
 	for (int h = 0; h < maze.height; h++)
@@ -68,7 +67,7 @@ Maze readTerrainFromFile(const char* _path)
 		{
 			int tile;
 			inFile >> tile;
-			data[h][w] = tile;
+			maze.terrain[h][w] = tile;
 
 			if (tile == 2)
 			{
