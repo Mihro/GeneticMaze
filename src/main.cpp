@@ -20,52 +20,77 @@ struct Chromosome {
 		fitness(_f)
 	{}
 };
+struct Maze
+{
+	int width;
+	int height;
+	int start[2] = {};
+	int finish[2] = {};
+	std::vector<std::vector<int>> terrain;
+};
 
-std::vector<std::vector<int>> readTerrainFromFile(const char* _path);
-std::vector<Chromosome> generatePopulation(int _size, int _chromosomeLength);
+Maze readTerrainFromFile(const char* _path);
+std::vector<Chromosome> generatePopulation(int _size, int _chromeLen);
+void populationFitness(std::vector<Chromosome>& _pop, Maze& _m);
+void chromosomeFitness(Chromosome& _chrome, Maze& _m);
 
 std::default_random_engine randomGenerator;
 std::uniform_real_distribution<double> uniformDistribution(0.0, 1.0);
 
 int main()
 {
-	std::vector<std::vector<int>> terrain = readTerrainFromFile("../src/Maze1.txt");
-	std::vector<Chromosome> population = generatePopulation(50, 16);
+	Maze maze = readTerrainFromFile("../src/Maze1.txt");
+	std::vector<Chromosome> population = generatePopulation(10, 16);
+	populationFitness(population, maze);
 
 	system("pause");
 	return 0;
 }
 
-std::vector<std::vector<int>> readTerrainFromFile(const char* _path)
+Maze readTerrainFromFile(const char* _path)
 {
 	std::ifstream inFile(_path);
 
+	Maze maze = {};
+
 	// Extract maze dimensions
-	int sizeX = 0, sizeY = 0;
-	inFile >> sizeX >> sizeY;
-	std::cout << sizeX << " " << sizeY << std::endl; // Debug output
+	inFile >> maze.width >> maze.height;
+	std::cout << maze.width << " " << maze.height << std::endl; // Debug output
 
 	// Create & resize 2D maze vector
 	std::vector<std::vector<int>> data;
-	data.resize(sizeY, std::vector<int>(sizeX));
+	data.resize(maze.height, std::vector<int>(maze.width));
 
 	// Populate 2D maze
-	for (int h = 0; h < sizeY; h++)
+	for (int h = 0; h < maze.height; h++)
 	{
-		for (int w = 0; w < sizeX; w++)
+		for (int w = 0; w < maze.width; w++)
 		{
-			inFile >> data[h][w];
-			std::cout << data[h][w] << " "; // Debug output
+			int tile;
+			inFile >> tile;
+			data[h][w] = tile;
+
+			if (tile == 2)
+			{
+				maze.start[0] = w;
+				maze.start[1] = h;
+			}
+			else if (tile == 3)
+			{
+				maze.finish[0] = w;
+				maze.finish[1] = h;
+			}
+			std::cout << tile << " "; // Debug output
 		}
 		std::cout << std::endl;
 	}
 
-	return data;
+	return maze;
 }
 
-std::vector<Chromosome> generatePopulation(int _size, int _chromosomeLength)
+std::vector<Chromosome> generatePopulation(int _size, int _chromeLen)
 {
-	std::cout << "\nPopulation size: " << _size << std::endl;
+	std::cout << "\nPopulation size: " << _size << "\tChromosome Length: " << _chromeLen << std::endl;
 
 	std::vector<Chromosome> pop;
 
@@ -74,7 +99,7 @@ std::vector<Chromosome> generatePopulation(int _size, int _chromosomeLength)
 		Chromosome member;
 		member.id = n + 1;
 
-		for (int length = 0; length < _chromosomeLength; length++)
+		for (int length = 0; length < _chromeLen; length++)
 		{
 			double r = uniformDistribution(randomGenerator);
 			if (r <= 0.5)
@@ -87,9 +112,31 @@ std::vector<Chromosome> generatePopulation(int _size, int _chromosomeLength)
 			}
 		}
 
-		std::cout << member.string << std::endl;
+		std::cout << member.id << ":\t" << member.string << std::endl;
 		pop.push_back(member);
 	}
 
 	return pop;
+}
+
+void populationFitness(std::vector<Chromosome>& _pop, Maze& _m)
+{
+	std::cout << "\nInstructions: " << std::endl;
+	for (int i = 0; i < _pop.size(); i++)
+	{
+		chromosomeFitness(_pop.at(i), _m);
+		std::cout << std::endl;
+	}
+}
+
+void chromosomeFitness(Chromosome& _chrome, Maze& _m)
+{
+	int currentPos[2] = {_m.start[0], _m.start[1]};
+
+	std::cout << _chrome.id << ":\t";
+	for (int i = 0; i < _chrome.string.length(); i+=2)
+	{
+		std::string gene = _chrome.string.substr(i, 2);
+		std::cout << gene << " ";
+	}
 }
