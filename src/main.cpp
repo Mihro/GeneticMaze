@@ -56,7 +56,9 @@ std::vector<Chromosome> generatePopulation(int _size, int _chromeLen);
 bool checkPopulationFitness(Maze& _m, Population& _population);
 bool traverseMaze(Maze& _m, Population& _population, Chromosome& _chrome);
 bool checkLegalMove(Maze& _m, std::vector<int>& _nextPos);
-float calcChromeFitness(Maze& _m, std::vector<int> _finalPos);
+float calcChromeFitness(Maze& _m, std::vector<int>& _finalPos);
+std::vector<Chromosome> selectChromeMates(Population& _population);
+Chromosome selectSingleWeightedChrome(Population& _population);
 
 std::default_random_engine randomGenerator( time(NULL) );
 std::uniform_real_distribution<double> uniformDistribution(0.0, 1.0);
@@ -64,7 +66,7 @@ std::uniform_real_distribution<double> uniformDistribution(0.0, 1.0);
 int main()
 {
 	Maze maze = readTerrainFromFile("../src/Labs15and16TerrainFile1.txt");
-	Population population;
+	Population population = {};
 	population.list = generatePopulation(POPULATION_SIZE, 16);
 	bool success = false;
 	success = checkPopulationFitness(maze, population);
@@ -72,6 +74,7 @@ int main()
 	{
 		// Do
 			// Select mates
+		std::vector<Chromosome> parents = selectChromeMates(population);
 			// Crossover
 			// Mutation
 			// Add offspring to new population
@@ -244,10 +247,36 @@ bool checkLegalMove(Maze& _m, std::vector<int>& _nextPos)
 	return true;
 }
 
-float calcChromeFitness(Maze& _m, std::vector<int> _finalPos)
+float calcChromeFitness(Maze& _m, std::vector<int>& _finalPos)
 {
 	int dx = abs(_finalPos[0] - _m.finish[0]);
 	int dy = abs(_finalPos[1] - _m.finish[1]);
 	float fitness = (float) 1 / (dx + dy + 1);
 	return fitness;
+}
+
+std::vector<Chromosome> selectChromeMates(Population& _population)
+{
+	std::vector<Chromosome> pair;
+
+	Chromosome chrome1 = selectSingleWeightedChrome(_population);
+	pair.push_back(chrome1);
+	Chromosome chrome2 = selectSingleWeightedChrome(_population);
+	pair.push_back(chrome1);
+
+	return pair;
+}
+
+Chromosome selectSingleWeightedChrome(Population& _population)
+{
+	float random = uniformDistribution(randomGenerator) * _population.totalFitness;
+
+	for (int i = 0; i < _population.list.size(); i++)
+	{
+		if (random < _population.list[i].fitness)
+		{
+			return _population.list[i];
+		}
+		random -= _population.list[i].fitness;
+	}
 }
