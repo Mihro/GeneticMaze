@@ -71,7 +71,7 @@ std::uniform_real_distribution<double> uniformRealDistribution(0.0, 1.0);
 
 int main()
 {
-	Maze maze = readTerrainFromFile("../src/Labs15and16TerrainFile1.txt");
+	Maze maze = readTerrainFromFile("../src/Labs15and16TerrainFile2.txt");
 
 	Population population = {};
 	population.list = generatePopulation(POPULATION_SIZE, 16);
@@ -80,10 +80,11 @@ int main()
 	int generationCount = 1;
 
 	bool success = false;
+	std::cout << "\nCurrent generation: " << generationCount << std::endl;
 	success = checkPopulationFitness(maze, population);
 	while (!success)
 	{
-		std::cout << "\nNew Generation: " << generationCount << std::endl;
+		std::cout << "\nNew Generation" << std::endl;
 
 		int newGenChromeId = 0;
 		// Do
@@ -105,9 +106,10 @@ int main()
 		newPopulation = {};
 		generationCount++;
 		// Calculate new fitness
+		std::cout << "\nCurrent generation: " << generationCount << std::endl;
 		success = checkPopulationFitness(maze, population);
 	}
-	std::cout << "Current generation: " << generationCount << std::endl;
+	std::cout << "\nCurrent generation: " << generationCount << std::endl;
 	std::cout << "Success!" << std::endl;
 	
 	system("pause");
