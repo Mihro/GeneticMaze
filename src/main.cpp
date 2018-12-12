@@ -51,7 +51,7 @@ struct Population
 
 Maze readTerrainFromFile(const char* _path);
 std::vector<Chromosome> generatePopulation(int _size, int _chromeLen);
-bool checkPopulationFitness(Maze& _m, Population& _pop);
+bool checkPopulationFitness(Maze& _m, Population& _population);
 bool traverseMaze(Maze& _m, Population& _population, Chromosome& _chrome);
 bool checkLegalMove(Maze& _m, std::vector<int>& _nextPos);
 float calcChromeFitness(Maze& _m, std::vector<int> _finalPos);
@@ -72,7 +72,7 @@ int main()
 	}
 	else
 	{
-
+		
 	}
 	
 	system("pause");
@@ -123,7 +123,7 @@ std::vector<Chromosome> generatePopulation(int _size, int _chromeLen)
 {
 	std::cout << "\nPopulation size: " << _size << "\tChromosome Length: " << _chromeLen << std::endl;
 
-	std::vector<Chromosome> pop;
+	std::vector<Chromosome> population;
 
 	for (int n = 0; n < _size; n++)
 	{
@@ -144,10 +144,10 @@ std::vector<Chromosome> generatePopulation(int _size, int _chromeLen)
 		}
 
 		std::cout << member.id << ":\t" << member.string << std::endl;
-		pop.push_back(member);
+		population.push_back(member);
 	}
 
-	return pop;
+	return population;
 }
 
 bool checkPopulationFitness(Maze& _m, Population& _population)
