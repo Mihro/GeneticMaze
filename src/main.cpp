@@ -7,7 +7,7 @@
 
 #define POPULATION_SIZE 10
 #define CROSSOVER_RATE 0.7f
-#define MUTATION_RATE 0.001f
+#define MUTATION_RATE 0.1f
 
 struct Maze
 {
@@ -269,7 +269,11 @@ std::vector<Chromosome> selectChromeMates(Population& _population)
 	Chromosome chrome1 = selectSingleWeightedChrome(_population);
 	pair.push_back(chrome1);
 	Chromosome chrome2 = selectSingleWeightedChrome(_population);
-	pair.push_back(chrome1);
+	pair.push_back(chrome2);
+
+	std::cout << "\nParents:" << std::endl;
+	std::cout << "ID: " << chrome1.id << "\tString: " << chrome1.string << "\tFitness: " << chrome1.fitness << std::endl;
+	std::cout << "ID: " << chrome2.id << "\tString: " << chrome2.string << "\tFitness: " << chrome2.fitness << std::endl;
 
 	return pair;
 }
@@ -291,20 +295,29 @@ Chromosome selectSingleWeightedChrome(Population& _population)
 void crossoverChromes(std::vector<Chromosome>& _mates)
 {
 	float crossover = uniformRealDistribution(randomGenerator);
-	if (crossover >= CROSSOVER_RATE)
+	if (crossover <= CROSSOVER_RATE)
 	{
 		int chromeLength = _mates[0].string.length();
 
 		std::uniform_int_distribution<int> uniformIntDistribution(1, chromeLength - 1);
 		int crossoverPoint = uniformIntDistribution(randomGenerator);
-
-		int before = crossoverPoint;
-		int after = chromeLength - crossoverPoint;
+		int size = chromeLength - crossoverPoint;
 
 		std::string& chrome1String = _mates[0].string;
 		std::string& chrome2String = _mates[1].string;
 
-		chrome1String.replace(before, after, chrome2String, before, after);
+		std::string swapPart1 = chrome1String.substr(crossoverPoint, size);
+		std::string swapPart2 = chrome2String.substr(crossoverPoint, size);
+		chrome1String.replace(crossoverPoint, size, swapPart2);
+		chrome2String.replace(crossoverPoint, size, swapPart1);
+
+		std::cout << "Crossover point: " << crossoverPoint << std::endl;
+		std::cout << "Child 1 string: " << chrome1String << std::endl;
+		std::cout << "Child 2 string: " << chrome2String << std::endl;
+	}
+	else
+	{
+		std::cout << "No crossover" << std::endl;
 	}
 }
 
@@ -315,20 +328,23 @@ void mutateChromes(std::vector<Chromosome>& _pair)
 		mutateChromeGene(_pair[0].string[i]);
 		mutateChromeGene(_pair[1].string[i]);
 	}
+	std::cout << "After mutation:" << std::endl;
+	std::cout << "Child 1 string: " << _pair[0].string << std::endl;
+	std::cout << "Child 2 string: " << _pair[1].string << std::endl;
 }
 
 void mutateChromeGene(char& _gene)
 {
 	float mutation = uniformRealDistribution(randomGenerator);
-	if (mutation >= MUTATION_RATE)
+	if (mutation <= MUTATION_RATE)
 	{
 		if (_gene == '0')
 		{
-			_gene == '1';
+			_gene = '1';
 		}
 		else if (_gene == '1')
 		{
-			_gene == '0';
+			_gene = '0';
 		}
 	}
 }
