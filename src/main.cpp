@@ -21,6 +21,15 @@ struct Chromosome {
 		fitness(_f)
 	{}
 };
+struct Population
+{
+	std::vector<Chromosome> list;
+	float totalFitness;
+
+	Population() : 
+		totalFitness(0.0f) 
+	{}
+};
 struct Maze
 {
 	int width;
@@ -42,7 +51,7 @@ struct Maze
 
 Maze readTerrainFromFile(const char* _path);
 std::vector<Chromosome> generatePopulation(int _size, int _chromeLen);
-bool checkPopulationFitness(std::vector<Chromosome>& _pop, Maze& _m);
+bool checkPopulationFitness(Population& _pop, Maze& _m);
 bool traverseMaze(Chromosome& _chrome, Maze& _m);
 bool checkLegalMove(std::vector<int>& _nextPos, Maze& _m);
 float calcChromeFitness(std::vector<int> _finalPos, Maze& _m);
@@ -53,7 +62,8 @@ std::uniform_real_distribution<double> uniformDistribution(0.0, 1.0);
 int main()
 {
 	Maze maze = readTerrainFromFile("../src/Labs15and16TerrainFile1.txt");
-	std::vector<Chromosome> population = generatePopulation(100, 16);
+	Population population;
+	population.list = generatePopulation(100, 16);
 	bool success = false;
 	success = checkPopulationFitness(population, maze);
 	if (success)
@@ -140,13 +150,13 @@ std::vector<Chromosome> generatePopulation(int _size, int _chromeLen)
 	return pop;
 }
 
-bool checkPopulationFitness(std::vector<Chromosome>& _population, Maze& _m)
+bool checkPopulationFitness(Population& _population, Maze& _m)
 {
 	bool traversalSuccess = false;
 	std::cout << "\nInstructions: " << std::endl;
-	for (int i = 0; i < _population.size(); i++)
+	for (int i = 0; i < _population.list.size(); i++)
 	{
-		traversalSuccess = traverseMaze(_population.at(i), _m);
+		traversalSuccess = traverseMaze(_population.list.at(i), _m);
 		std::cout << std::endl;
 
 		if (traversalSuccess)
