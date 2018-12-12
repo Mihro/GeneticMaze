@@ -5,6 +5,8 @@
 #include <string>
 #include <ctime>
 
+#define POPULATION_SIZE 100
+
 struct Maze
 {
 	int width;
@@ -63,17 +65,21 @@ int main()
 {
 	Maze maze = readTerrainFromFile("../src/Labs15and16TerrainFile1.txt");
 	Population population;
-	population.list = generatePopulation(100, 16);
+	population.list = generatePopulation(POPULATION_SIZE, 16);
 	bool success = false;
 	success = checkPopulationFitness(maze, population);
-	if (success)
+	while (!success)
 	{
-		std::cout << "Success!" << std::endl;
+		// Do
+			// Select mates
+			// Crossover
+			// Mutation
+			// Add offspring to new population
+		// While new population < POPULATION_SIZE
+		// Swap old population for new
+		// Calculate new fitness
 	}
-	else
-	{
-		
-	}
+	std::cout << "Success!" << std::endl;
 	
 	system("pause");
 	return 0;
