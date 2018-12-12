@@ -5,6 +5,24 @@
 #include <string>
 #include <ctime>
 
+struct Maze
+{
+	int width;
+	int height;
+	std::vector<int> start;
+	std::vector<int> finish;
+	std::vector<std::vector<int>> terrain;
+
+	Maze()
+	{
+		start.resize(2);
+		finish.resize(2);
+	}
+	int getCell(int _x, int _y)
+	{
+		return terrain[_x][_y];
+	}
+};
 struct Chromosome {
 	int id;
 	std::string string;
@@ -30,31 +48,13 @@ struct Population
 		totalFitness(0.0f) 
 	{}
 };
-struct Maze
-{
-	int width;
-	int height;
-	std::vector<int> start;
-	std::vector<int> finish;
-	std::vector<std::vector<int>> terrain;
-
-	Maze()
-	{
-		start.resize(2);
-		finish.resize(2);
-	}
-	int getCell(int _x, int _y)
-	{
-		return terrain[_x][_y];
-	}
-};
 
 Maze readTerrainFromFile(const char* _path);
 std::vector<Chromosome> generatePopulation(int _size, int _chromeLen);
-bool checkPopulationFitness(Population& _pop, Maze& _m);
-bool traverseMaze(Chromosome& _chrome, Maze& _m);
-bool checkLegalMove(std::vector<int>& _nextPos, Maze& _m);
-float calcChromeFitness(std::vector<int> _finalPos, Maze& _m);
+bool checkPopulationFitness(Maze& _m, Population& _pop);
+bool traverseMaze(Maze& _m, Population& _population, Chromosome& _chrome);
+bool checkLegalMove(Maze& _m, std::vector<int>& _nextPos);
+float calcChromeFitness(Maze& _m, std::vector<int> _finalPos);
 
 std::default_random_engine randomGenerator( time(NULL) );
 std::uniform_real_distribution<double> uniformDistribution(0.0, 1.0);
@@ -65,7 +65,7 @@ int main()
 	Population population;
 	population.list = generatePopulation(100, 16);
 	bool success = false;
-	success = checkPopulationFitness(population, maze);
+	success = checkPopulationFitness(maze, population);
 	if (success)
 	{
 		std::cout << "Success!" << std::endl;
@@ -150,24 +150,25 @@ std::vector<Chromosome> generatePopulation(int _size, int _chromeLen)
 	return pop;
 }
 
-bool checkPopulationFitness(Population& _population, Maze& _m)
+bool checkPopulationFitness(Maze& _m, Population& _population)
 {
 	bool traversalSuccess = false;
 	std::cout << "\nInstructions: " << std::endl;
 	for (int i = 0; i < _population.list.size(); i++)
 	{
-		traversalSuccess = traverseMaze(_population.list.at(i), _m);
+		traversalSuccess = traverseMaze(_m, _population, _population.list.at(i));
 		std::cout << std::endl;
 
 		if (traversalSuccess)
 		{
+			std::cout << "Total Fitness: " << _population.totalFitness << std::endl;
 			return true;
 		}
 	}
 	return false;
 }
 
-bool traverseMaze(Chromosome& _chrome, Maze& _m)
+bool traverseMaze(Maze& _m, Population& _population, Chromosome& _chrome)
 {
 	std::cout << "Chromosome ID: " << _chrome.id << std::endl;
 	
@@ -198,14 +199,16 @@ bool traverseMaze(Chromosome& _chrome, Maze& _m)
 		{
 			nextPos[0] -= 1;
 		}
-		if (checkLegalMove(nextPos, _m))
+		if (checkLegalMove(_m, nextPos))
 		{
 			currentPos = nextPos;
 		}
 	}
 	std::cout << std::endl;
 
-	_chrome.fitness = calcChromeFitness(currentPos, _m);
+	float chromeFitness = calcChromeFitness(_m, currentPos);
+	_chrome.fitness = chromeFitness;
+	_population.totalFitness += chromeFitness;
 
 	std::cout << "Start (" << _m.start[0] << "," << _m.start[1] << ")";
 	std::cout << "\tEnd (" << currentPos[0] << "," << currentPos[1] << ")";
@@ -221,7 +224,7 @@ bool traverseMaze(Chromosome& _chrome, Maze& _m)
 	}
 }
 
-bool checkLegalMove(std::vector<int>& _nextPos, Maze& _m)
+bool checkLegalMove(Maze& _m, std::vector<int>& _nextPos)
 {
 	if (!(_nextPos[0] >= 0 && _nextPos[0] < _m.width) || // If move-to tile is not in X bounds
 		!(_nextPos[1] >= 0 && _nextPos[1] < _m.height))	 // If move-to tile is not in Y bounds
@@ -235,7 +238,7 @@ bool checkLegalMove(std::vector<int>& _nextPos, Maze& _m)
 	return true;
 }
 
-float calcChromeFitness(std::vector<int> _finalPos, Maze& _m)
+float calcChromeFitness(Maze& _m, std::vector<int> _finalPos)
 {
 	int dx = abs(_finalPos[0] - _m.finish[0]);
 	int dy = abs(_finalPos[1] - _m.finish[1]);
