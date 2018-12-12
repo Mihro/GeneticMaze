@@ -61,7 +61,9 @@ bool checkLegalMove(Maze& _m, std::vector<int>& _nextPos);
 float calcChromeFitness(Maze& _m, std::vector<int>& _finalPos);
 std::vector<Chromosome> selectChromeMates(Population& _population);
 Chromosome selectSingleWeightedChrome(Population& _population);
-void crossoverChromes(std::vector<Chromosome>& _parents);
+void crossoverChromes(std::vector<Chromosome>& _mates);
+void mutateChromes(std::vector<Chromosome>& _pair);
+void mutateChromeGene(char& _gene);
 
 std::default_random_engine randomGenerator( time(NULL) );
 std::uniform_real_distribution<double> uniformRealDistribution(0.0, 1.0);
@@ -81,6 +83,7 @@ int main()
 			// Crossover
 		crossoverChromes(chromePair);
 			// Mutation
+		mutateChromes(chromePair);
 			// Add offspring to new population
 		// While new population < POPULATION_SIZE
 		// Swap old population for new
@@ -302,5 +305,30 @@ void crossoverChromes(std::vector<Chromosome>& _mates)
 		std::string& chrome2String = _mates[1].string;
 
 		chrome1String.replace(before, after, chrome2String, before, after);
+	}
+}
+
+void mutateChromes(std::vector<Chromosome>& _pair)
+{
+	for (int i = 0; i < _pair[0].string.length(); i++)
+	{
+		mutateChromeGene(_pair[0].string[i]);
+		mutateChromeGene(_pair[1].string[i]);
+	}
+}
+
+void mutateChromeGene(char& _gene)
+{
+	float mutation = uniformRealDistribution(randomGenerator);
+	if (mutation >= MUTATION_RATE)
+	{
+		if (_gene == '0')
+		{
+			_gene == '1';
+		}
+		else if (_gene == '1')
+		{
+			_gene == '0';
+		}
 	}
 }
