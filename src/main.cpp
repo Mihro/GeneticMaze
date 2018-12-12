@@ -5,7 +5,9 @@
 #include <string>
 #include <ctime>
 
-#define POPULATION_SIZE 100
+#define POPULATION_SIZE 10
+#define CROSSOVER_RATE 0.7f
+#define MUTATION_RATE 0.001f
 
 struct Maze
 {
@@ -59,9 +61,10 @@ bool checkLegalMove(Maze& _m, std::vector<int>& _nextPos);
 float calcChromeFitness(Maze& _m, std::vector<int>& _finalPos);
 std::vector<Chromosome> selectChromeMates(Population& _population);
 Chromosome selectSingleWeightedChrome(Population& _population);
+void crossoverChromes(std::vector<Chromosome>& _parents);
 
 std::default_random_engine randomGenerator( time(NULL) );
-std::uniform_real_distribution<double> uniformDistribution(0.0, 1.0);
+std::uniform_real_distribution<double> uniformRealDistribution(0.0, 1.0);
 
 int main()
 {
@@ -74,8 +77,9 @@ int main()
 	{
 		// Do
 			// Select mates
-		std::vector<Chromosome> parents = selectChromeMates(population);
+		std::vector<Chromosome> chromePair = selectChromeMates(population);
 			// Crossover
+		crossoverChromes(chromePair);
 			// Mutation
 			// Add offspring to new population
 		// While new population < POPULATION_SIZE
@@ -141,7 +145,7 @@ std::vector<Chromosome> generatePopulation(int _size, int _chromeLen)
 
 		for (int length = 0; length < _chromeLen; length++)
 		{
-			double r = uniformDistribution(randomGenerator);
+			double r = uniformRealDistribution(randomGenerator);
 			if (r <= 0.5)
 			{
 				member.string.append("0");
@@ -269,7 +273,7 @@ std::vector<Chromosome> selectChromeMates(Population& _population)
 
 Chromosome selectSingleWeightedChrome(Population& _population)
 {
-	float random = uniformDistribution(randomGenerator) * _population.totalFitness;
+	float random = uniformRealDistribution(randomGenerator) * _population.totalFitness;
 
 	for (int i = 0; i < _population.list.size(); i++)
 	{
@@ -278,5 +282,25 @@ Chromosome selectSingleWeightedChrome(Population& _population)
 			return _population.list[i];
 		}
 		random -= _population.list[i].fitness;
+	}
+}
+
+void crossoverChromes(std::vector<Chromosome>& _mates)
+{
+	float crossover = uniformRealDistribution(randomGenerator);
+	if (crossover >= CROSSOVER_RATE)
+	{
+		int chromeLength = _mates[0].string.length();
+
+		std::uniform_int_distribution<int> uniformIntDistribution(1, chromeLength - 1);
+		int crossoverPoint = uniformIntDistribution(randomGenerator);
+
+		int before = crossoverPoint;
+		int after = chromeLength - crossoverPoint;
+
+		std::string& chrome1String = _mates[0].string;
+		std::string& chrome2String = _mates[1].string;
+
+		chrome1String.replace(before, after, chrome2String, before, after);
 	}
 }
