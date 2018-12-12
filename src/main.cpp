@@ -42,7 +42,7 @@ struct Maze
 
 Maze readTerrainFromFile(const char* _path);
 std::vector<Chromosome> generatePopulation(int _size, int _chromeLen);
-void populationFitness(std::vector<Chromosome>& _pop, Maze& _m);
+bool checkPopulationFitness(std::vector<Chromosome>& _pop, Maze& _m);
 bool traverseMaze(Chromosome& _chrome, Maze& _m);
 bool checkLegalMove(std::vector<int>& _nextPos, Maze& _m);
 float calcChromeFitness(std::vector<int> _finalPos, Maze& _m);
@@ -54,8 +54,17 @@ int main()
 {
 	Maze maze = readTerrainFromFile("../src/Labs15and16TerrainFile1.txt");
 	std::vector<Chromosome> population = generatePopulation(100, 16);
-	populationFitness(population, maze);
+	bool success = false;
+	success = checkPopulationFitness(population, maze);
+	if (success)
+	{
+		std::cout << "Success!" << std::endl;
+	}
+	else
+	{
 
+	}
+	
 	system("pause");
 	return 0;
 }
@@ -131,7 +140,7 @@ std::vector<Chromosome> generatePopulation(int _size, int _chromeLen)
 	return pop;
 }
 
-void populationFitness(std::vector<Chromosome>& _population, Maze& _m)
+bool checkPopulationFitness(std::vector<Chromosome>& _population, Maze& _m)
 {
 	bool traversalSuccess = false;
 	std::cout << "\nInstructions: " << std::endl;
@@ -142,10 +151,10 @@ void populationFitness(std::vector<Chromosome>& _population, Maze& _m)
 
 		if (traversalSuccess)
 		{
-			std::cout << "Success!" << std::endl;
-			break;
+			return true;
 		}
 	}
+	return false;
 }
 
 bool traverseMaze(Chromosome& _chrome, Maze& _m)
