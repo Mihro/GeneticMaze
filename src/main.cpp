@@ -24,15 +24,26 @@ struct Maze
 {
 	int width;
 	int height;
-	int start[2] = {};
-	int finish[2] = {};
+	std::vector<int> start;
+	std::vector<int> finish;
 	std::vector<std::vector<int>> terrain;
+
+	Maze()
+	{
+		start.resize(2);
+		finish.resize(2);
+	}
+	int getCell(int _x, int _y)
+	{
+		return terrain[_x][_y];
+	}
 };
 
 Maze readTerrainFromFile(const char* _path);
 std::vector<Chromosome> generatePopulation(int _size, int _chromeLen);
 void populationFitness(std::vector<Chromosome>& _pop, Maze& _m);
-void chromosomeFitness(Chromosome& _chrome, Maze& _m);
+void traverseMaze(Chromosome& _chrome, Maze& _m);
+bool checkLegalMove(std::vector<int>& _nextPos, Maze& _m);
 
 std::default_random_engine randomGenerator;
 std::uniform_real_distribution<double> uniformDistribution(0.0, 1.0);
@@ -58,7 +69,7 @@ Maze readTerrainFromFile(const char* _path)
 	std::cout << maze.width << " " << maze.height << std::endl; // Debug output
 
 	// Resize 2D maze terrain
-	maze.terrain.resize(maze.height, std::vector<int>(maze.width));
+	maze.terrain.resize(maze.width, std::vector<int>(maze.height));
 
 	// Populate 2D maze
 	for (int h = 0; h < maze.height; h++)
@@ -67,7 +78,7 @@ Maze readTerrainFromFile(const char* _path)
 		{
 			int tile;
 			inFile >> tile;
-			maze.terrain[h][w] = tile;
+			maze.terrain[w][h] = tile;
 
 			if (tile == 2)
 			{
@@ -118,24 +129,63 @@ std::vector<Chromosome> generatePopulation(int _size, int _chromeLen)
 	return pop;
 }
 
-void populationFitness(std::vector<Chromosome>& _pop, Maze& _m)
+void populationFitness(std::vector<Chromosome>& _population, Maze& _m)
 {
 	std::cout << "\nInstructions: " << std::endl;
-	for (int i = 0; i < _pop.size(); i++)
+	for (int i = 0; i < _population.size(); i++)
 	{
-		chromosomeFitness(_pop.at(i), _m);
+		traverseMaze(_population.at(i), _m);
 		std::cout << std::endl;
 	}
 }
 
-void chromosomeFitness(Chromosome& _chrome, Maze& _m)
+void traverseMaze(Chromosome& _chrome, Maze& _m)
 {
-	int currentPos[2] = {_m.start[0], _m.start[1]};
+	std::vector<int> currentPos = _m.start;
 
 	std::cout << _chrome.id << ":\t";
 	for (int i = 0; i < _chrome.string.length(); i+=2)
 	{
 		std::string gene = _chrome.string.substr(i, 2);
 		std::cout << gene << " ";
+		std::vector<int> nextPos = currentPos;
+		if (gene == "00") // Up
+		{
+			nextPos[1] -= 1;
+		}
+		else if (gene == "01") // Right
+		{
+			nextPos[0] += 1;
+		}
+		else if (gene == "10") // Down
+		{
+			nextPos[1] += 1;
+		}
+		else if (gene == "11") // Left
+		{
+			nextPos[0] -= 1;
+		}
+		if (checkLegalMove(nextPos, _m))
+		{
+			currentPos = nextPos;
+		}
 	}
+
+	std::cout << std::endl;
+	std::cout << _chrome.id << ": Start (" << _m.start[0] << "," << _m.start[1] << ")";
+	std::cout << "\tEnd (" << currentPos[0] << "," << currentPos[1] << ")" << std::endl;
+}
+
+bool checkLegalMove(std::vector<int>& _nextPos, Maze& _m)
+{
+	if (!(_nextPos[0] >= 0 && _nextPos[0] < _m.width) || // If move-to tile is not in X bounds
+		!(_nextPos[1] >= 0 && _nextPos[1] < _m.height))	 // If move-to tile is not in Y bounds
+	{
+		return false;
+	}
+	if (_m.getCell(_nextPos[0], _nextPos[1]) == 1)		 // If move-to tile is a wall
+	{
+		return false;
+	}
+	return true;
 }
