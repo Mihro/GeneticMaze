@@ -54,6 +54,8 @@ struct Population
 };
 
 Maze readTerrainFromFile(const char* _path);
+
+void geneticAlgorithm(Maze& _m);
 std::vector<Chromosome> generatePopulation(int _size, int _chromeLen);
 bool checkPopulationFitness(Maze& _m, Population& _population);
 bool traverseMaze(Maze& _m, Population& _population, Chromosome& _chrome);
@@ -73,44 +75,7 @@ int main()
 {
 	Maze maze = readTerrainFromFile("../src/Labs15and16TerrainFile2.txt");
 
-	Population population = {};
-	population.list = generatePopulation(POPULATION_SIZE, 16);
-	Population newPopulation = {};
-
-	int generationCount = 1;
-
-	bool success = false;
-	std::cout << "\nCurrent generation: " << generationCount << std::endl;
-	success = checkPopulationFitness(maze, population);
-	while (!success)
-	{
-		std::cout << "\nNew Generation" << std::endl;
-
-		int newGenChromeId = 0;
-		// Do
-		do
-		{
-			// Select mates
-			std::vector<Chromosome> chromePair = selectChromeMates(population);
-			// Crossover
-			crossoverChromes(chromePair);
-			// Mutation
-			mutateChromes(chromePair);
-			// Add offspring to new population
-			appendNewPopulationChromes(newPopulation, chromePair, newGenChromeId);
-		} 
-		// While new population < POPULATION_SIZE
-		while (newPopulation.list.size() < POPULATION_SIZE);
-		// Swap old population for new
-		population = newPopulation;
-		newPopulation = {};
-		generationCount++;
-		// Calculate new fitness
-		std::cout << "\nCurrent generation: " << generationCount << std::endl;
-		success = checkPopulationFitness(maze, population);
-	}
-	std::cout << "\nCurrent generation: " << generationCount << std::endl;
-	std::cout << "Success!" << std::endl;
+	geneticAlgorithm(maze);
 	
 	system("pause");
 	return 0;
@@ -154,6 +119,49 @@ Maze readTerrainFromFile(const char* _path)
 	}
 
 	return maze;
+}
+
+void geneticAlgorithm(Maze& _m)
+{
+	Population population = {};
+	population.list = generatePopulation(POPULATION_SIZE, 16);
+	Population newPopulation = {};
+
+	int generationCount = 1;
+
+	bool success = false;
+	std::cout << "\nCurrent generation: " << generationCount << std::endl;
+	success = checkPopulationFitness(_m, population);
+	while (!success)
+	{
+		std::cout << "\nNew Generation" << std::endl;
+
+		int newGenChromeId = 0;
+		// Do
+		do
+		{
+			// Select mates
+			std::vector<Chromosome> chromePair = selectChromeMates(population);
+			// Crossover
+			crossoverChromes(chromePair);
+			// Mutation
+			mutateChromes(chromePair);
+			// Add offspring to new population
+			appendNewPopulationChromes(newPopulation, chromePair, newGenChromeId);
+		}
+		// While new population < POPULATION_SIZE
+		while (newPopulation.list.size() < POPULATION_SIZE);
+		// Swap old population for new
+		population = newPopulation;
+		newPopulation = {};
+		generationCount++;
+		// Calculate new fitness
+		std::cout << "\nCurrent generation: " << generationCount << std::endl;
+		success = checkPopulationFitness(_m, population);
+	}
+	std::cout << "\nCurrent generation: " << generationCount << std::endl;
+	std::cout << "Success!" << std::endl;
+
 }
 
 std::vector<Chromosome> generatePopulation(int _size, int _chromeLen)
