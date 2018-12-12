@@ -7,7 +7,7 @@
 
 #define POPULATION_SIZE 10
 #define CROSSOVER_RATE 0.7f
-#define MUTATION_RATE 0.1f
+#define MUTATION_RATE 0.001f
 
 struct Maze
 {
