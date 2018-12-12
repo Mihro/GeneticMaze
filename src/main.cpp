@@ -64,6 +64,7 @@ Chromosome selectSingleWeightedChrome(Population& _population);
 void crossoverChromes(std::vector<Chromosome>& _mates);
 void mutateChromes(std::vector<Chromosome>& _pair);
 void mutateChromeGene(char& _gene);
+void appendNewPopulationChromes(Population& _newPopulation, std::vector<Chromosome>& _chromes, int& _newGenId);
 
 std::default_random_engine randomGenerator( time(NULL) );
 std::uniform_real_distribution<double> uniformRealDistribution(0.0, 1.0);
@@ -71,24 +72,42 @@ std::uniform_real_distribution<double> uniformRealDistribution(0.0, 1.0);
 int main()
 {
 	Maze maze = readTerrainFromFile("../src/Labs15and16TerrainFile1.txt");
+
 	Population population = {};
 	population.list = generatePopulation(POPULATION_SIZE, 16);
+	Population newPopulation = {};
+
+	int generationCount = 1;
+
 	bool success = false;
 	success = checkPopulationFitness(maze, population);
 	while (!success)
 	{
+		std::cout << "\nNew Generation: " << generationCount << std::endl;
+
+		int newGenChromeId = 0;
 		// Do
+		do
+		{
 			// Select mates
-		std::vector<Chromosome> chromePair = selectChromeMates(population);
+			std::vector<Chromosome> chromePair = selectChromeMates(population);
 			// Crossover
-		crossoverChromes(chromePair);
+			crossoverChromes(chromePair);
 			// Mutation
-		mutateChromes(chromePair);
+			mutateChromes(chromePair);
 			// Add offspring to new population
+			appendNewPopulationChromes(newPopulation, chromePair, newGenChromeId);
+		} 
 		// While new population < POPULATION_SIZE
+		while (newPopulation.list.size() < POPULATION_SIZE);
 		// Swap old population for new
+		population = newPopulation;
+		newPopulation = {};
+		generationCount++;
 		// Calculate new fitness
+		success = checkPopulationFitness(maze, population);
 	}
+	std::cout << "Current generation: " << generationCount << std::endl;
 	std::cout << "Success!" << std::endl;
 	
 	system("pause");
@@ -137,7 +156,8 @@ Maze readTerrainFromFile(const char* _path)
 
 std::vector<Chromosome> generatePopulation(int _size, int _chromeLen)
 {
-	std::cout << "\nPopulation size: " << _size << "\tChromosome Length: " << _chromeLen << std::endl;
+	std::cout << "\nInitial Generation" << std::endl;
+	std::cout << "Population size: " << _size << "\tChromosome Length: " << _chromeLen << std::endl;
 
 	std::vector<Chromosome> population;
 
@@ -177,10 +197,10 @@ bool checkPopulationFitness(Maze& _m, Population& _population)
 
 		if (traversalSuccess)
 		{
-			std::cout << "Total Fitness: " << _population.totalFitness << std::endl;
 			return true;
 		}
 	}
+	std::cout << "Total Fitness: " << _population.totalFitness << std::endl;
 	return false;
 }
 
@@ -347,4 +367,12 @@ void mutateChromeGene(char& _gene)
 			_gene = '0';
 		}
 	}
+}
+
+void appendNewPopulationChromes(Population& _newPopulation, std::vector<Chromosome>& _chromes, int& _newGenId)
+{
+	_chromes[0].id = _newGenId++;
+	_chromes[1].id = _newGenId++;
+	_newPopulation.list.push_back(_chromes[0]);
+	_newPopulation.list.push_back(_chromes[1]);
 }
