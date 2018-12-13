@@ -4,10 +4,12 @@
 #include <random>
 #include <string>
 #include <ctime>
+#include <chrono>
 
 #define POPULATION_SIZE 200
 #define CROSSOVER_RATE 0.7f
 #define MUTATION_RATE 0.0625f
+// Optional: Comment out if more debug info for the Genetic Algorithm should be printed to console.
 #define REDUCED_GA_DEBUG_INFO
 
 struct Maze
@@ -53,6 +55,27 @@ struct Population
 		totalFitness(0.0f) 
 	{}
 };
+struct Timer
+{
+	std::chrono::high_resolution_clock::time_point start;
+	std::chrono::duration<double> duration;
+
+	Timer() :
+		duration(0.0f)
+	{}
+	void startClock()
+	{
+		start = std::chrono::high_resolution_clock::now();
+	}
+	void stopClock()
+	{
+		duration = std::chrono::high_resolution_clock::now() - start;
+	}
+	double getDuration()
+	{
+		return duration.count();
+	}
+};
 
 Maze readTerrainFromFile(const char* _path);
 
@@ -74,7 +97,11 @@ std::uniform_real_distribution<double> uniformRealDistribution(0.0, 1.0);
 
 int main()
 {
+	Timer mazeReadTimer;
+	mazeReadTimer.startClock();
 	Maze maze = readTerrainFromFile("../src/Labs15and16TerrainFile2.txt");
+	mazeReadTimer.stopClock();
+	std::cout << "Time: " << mazeReadTimer.getDuration() << std::endl;
 
 	geneticAlgorithm(maze);
 	
