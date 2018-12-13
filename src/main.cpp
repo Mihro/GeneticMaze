@@ -5,9 +5,10 @@
 #include <string>
 #include <ctime>
 
-#define POPULATION_SIZE 10
+#define POPULATION_SIZE 200
 #define CROSSOVER_RATE 0.7f
-#define MUTATION_RATE 0.001f
+#define MUTATION_RATE 0.0625f
+#define REDUCED_GA_DEBUG_INFO
 
 struct Maze
 {
@@ -134,7 +135,9 @@ void geneticAlgorithm(Maze& _m)
 	success = checkPopulationFitness(_m, population);
 	while (!success)
 	{
+#ifndef REDUCED_GA_DEBUG_INFO
 		std::cout << "\nNew Generation" << std::endl;
+#endif // REDUCED_GA_DEBUG_INFO
 
 		int newGenChromeId = 0;
 		// Do
@@ -160,6 +163,16 @@ void geneticAlgorithm(Maze& _m)
 		success = checkPopulationFitness(_m, population);
 	}
 	std::cout << "\nCurrent generation: " << generationCount << std::endl;
+#ifdef REDUCED_GA_DEBUG_INFO
+	for (int i = 0; i < population.list.size(); i++)
+	{
+		if (population.list[i].fitness == 1.0f)
+		{
+			std::cout << "ID: " << population.list[i].id << "\t: " << population.list[i].string << std::endl;
+			break;
+		}
+	}
+#endif // REDUCED_GA_DEBUG_INFO
 	std::cout << "Success!" << std::endl;
 
 }
@@ -199,11 +212,15 @@ std::vector<Chromosome> generatePopulation(int _size, int _chromeLen)
 bool checkPopulationFitness(Maze& _m, Population& _population)
 {
 	bool traversalSuccess = false;
+#ifndef REDUCED_GA_DEBUG_INFO
 	std::cout << "\nInstructions: " << std::endl;
+#endif // !REDUCED_GA_DEBUG_INFO
 	for (int i = 0; i < _population.list.size(); i++)
 	{
 		traversalSuccess = traverseMaze(_m, _population, _population.list.at(i));
+#ifndef REDUCED_GA_DEBUG_INFO
 		std::cout << std::endl;
+#endif // !REDUCED_GA_DEBUG_INFO
 
 		if (traversalSuccess)
 		{
@@ -211,21 +228,25 @@ bool checkPopulationFitness(Maze& _m, Population& _population)
 		}
 	}
 	std::cout << "Total Fitness: " << _population.totalFitness << std::endl;
+	std::cout << "Average Fitness: " << (_population.totalFitness / POPULATION_SIZE) << std::endl;
 	return false;
 }
 
 bool traverseMaze(Maze& _m, Population& _population, Chromosome& _chrome)
 {
+#ifndef REDUCED_GA_DEBUG_INFO
 	std::cout << "Chromosome ID: " << _chrome.id << std::endl;
-	
 	std::cout << "Gene: ";
+#endif // !REDUCED_GA_DEBUG_INFO
 	
 	std::vector<int> currentPos = _m.start;
 
 	for (int i = 0; i < _chrome.string.length(); i+=2)
 	{
 		std::string gene = _chrome.string.substr(i, 2);
+#ifndef REDUCED_GA_DEBUG_INFO
 		std::cout << gene << " ";
+#endif // !REDUCED_GA_DEBUG_INFO
 
 		std::vector<int> nextPos = currentPos;
 
@@ -250,15 +271,19 @@ bool traverseMaze(Maze& _m, Population& _population, Chromosome& _chrome)
 			currentPos = nextPos;
 		}
 	}
+#ifndef REDUCED_GA_DEBUG_INFO
 	std::cout << std::endl;
+#endif // !REDUCED_GA_DEBUG_INFO
 
 	float chromeFitness = calcChromeFitness(_m, currentPos);
 	_chrome.fitness = chromeFitness;
 	_population.totalFitness += chromeFitness;
 
+#ifndef REDUCED_GA_DEBUG_INFO
 	std::cout << "Start (" << _m.start[0] << "," << _m.start[1] << ")";
 	std::cout << "\tEnd (" << currentPos[0] << "," << currentPos[1] << ")";
 	std::cout << "\tFitness: " << _chrome.fitness << std::endl;
+#endif // !REDUCED_GA_DEBUG_INFO
 
 	if (_chrome.fitness == 1.0f)
 	{
@@ -301,9 +326,11 @@ std::vector<Chromosome> selectChromeMates(Population& _population)
 	Chromosome chrome2 = selectSingleWeightedChrome(_population);
 	pair.push_back(chrome2);
 
+#ifndef REDUCED_GA_DEBUG_INFO
 	std::cout << "\nParents:" << std::endl;
 	std::cout << "ID: " << chrome1.id << "\tString: " << chrome1.string << "\tFitness: " << chrome1.fitness << std::endl;
 	std::cout << "ID: " << chrome2.id << "\tString: " << chrome2.string << "\tFitness: " << chrome2.fitness << std::endl;
+#endif // !REDUCED_GA_DEBUG_INFO
 
 	return pair;
 }
@@ -341,13 +368,17 @@ void crossoverChromes(std::vector<Chromosome>& _mates)
 		chrome1String.replace(crossoverPoint, size, swapPart2);
 		chrome2String.replace(crossoverPoint, size, swapPart1);
 
+#ifndef REDUCED_GA_DEBUG_INFO
 		std::cout << "Crossover point: " << crossoverPoint << std::endl;
 		std::cout << "Child 1 string: " << chrome1String << std::endl;
 		std::cout << "Child 2 string: " << chrome2String << std::endl;
+#endif // !REDUCED_GA_DEBUG_INFO
 	}
 	else
 	{
+#ifndef REDUCED_GA_DEBUG_INFO
 		std::cout << "No crossover" << std::endl;
+#endif // !REDUCED_GA_DEBUG_INFO
 	}
 }
 
@@ -358,9 +389,11 @@ void mutateChromes(std::vector<Chromosome>& _pair)
 		mutateChromeGene(_pair[0].string[i]);
 		mutateChromeGene(_pair[1].string[i]);
 	}
+#ifndef REDUCED_GA_DEBUG_INFO
 	std::cout << "After mutation:" << std::endl;
 	std::cout << "Child 1 string: " << _pair[0].string << std::endl;
 	std::cout << "Child 2 string: " << _pair[1].string << std::endl;
+#endif // !REDUCED_GA_DEBUG_INFO
 }
 
 void mutateChromeGene(char& _gene)
